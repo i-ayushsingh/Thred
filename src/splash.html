@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thred</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0a0a0a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .logo {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <img class="logo" src="../public/icons/professional_trimmed.png" alt="Thred Logo" />
+  </div>
+</body>
+</html>
