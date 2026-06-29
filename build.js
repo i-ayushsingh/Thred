@@ -86,6 +86,14 @@ if (fs.existsSync(exeSrc)) {
   console.log('  Created Thred.exe');
 }
 
+// 12. Set app icon on Thred.exe
+const rcedit = path.join(__dirname, 'node_modules', 'rcedit', 'bin', 'rcedit-x64.exe');
+const icoPath = path.join(__dirname, 'public', 'icons', 'app.ico');
+if (fs.existsSync(rcedit) && fs.existsSync(icoPath)) {
+  require('child_process').execSync(`"${rcedit}" "${exeDst}" --set-icon "${icoPath}"`);
+  console.log('  Set app icon');
+}
+
 // Calculate total size
 let totalSize = 0;
 const walkDir = (dir) => {
