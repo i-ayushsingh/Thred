@@ -8,6 +8,7 @@
   "scripts": {
     "start": "electron-forge start",
     "build": "node build.js",
+    "make:installer": "node make.js",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
