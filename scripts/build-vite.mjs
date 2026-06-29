@@ -21,16 +21,25 @@ async function buildMain() {
       MAIN_WINDOW_VITE_DEV_SERVER_URL: 'undefined',
       MAIN_WINDOW_VITE_NAME: JSON.stringify('main_window'),
     },
+    // Build for the Node/Electron-main environment so Vite uses node resolution
+    // (no browser fields, no `window`). `noExternal: true` bundles npm deps;
+    // only electron + node builtins stay external.
+    ssr: { noExternal: true },
+    resolve: { conditions: ['node'] },
     build: {
       outDir: '.vite/build',
       emptyOutDir: true,
       minify: false,
-      lib: {
-        entry: 'src/main.ts',
-        formats: ['cjs'],
-        fileName: () => 'main.js',
+      ssr: true,
+      rollupOptions: {
+        input: 'src/main.ts',
+        external: nodeExternals,
+        output: {
+          format: 'cjs',
+          entryFileNames: 'main.js',
+          inlineDynamicImports: true,
+        },
       },
-      rollupOptions: { external: nodeExternals },
     },
   });
 }
@@ -38,16 +47,22 @@ async function buildMain() {
 async function buildPreload() {
   await build({
     configFile: false,
+    ssr: { noExternal: true },
+    resolve: { conditions: ['node'] },
     build: {
       outDir: '.vite/build',
       emptyOutDir: false, // keep main.js
       minify: false,
-      lib: {
-        entry: 'src/preload.ts',
-        formats: ['cjs'],
-        fileName: () => 'preload.js',
+      ssr: true,
+      rollupOptions: {
+        input: 'src/preload.ts',
+        external: nodeExternals,
+        output: {
+          format: 'cjs',
+          entryFileNames: 'preload.js',
+          inlineDynamicImports: true,
+        },
       },
-      rollupOptions: { external: nodeExternals },
     },
   });
 }
