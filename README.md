@@ -130,7 +130,7 @@ Download the latest release for your platform from the [Releases page](https://g
 
 ```bash
 git clone https://github.com/i-ayushsingh/thred.git
-cd opencode
+cd thred
 npm install
 npm start
 ```
