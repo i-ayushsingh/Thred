@@ -24,10 +24,6 @@ export interface TemplateConfig {
   category: string;
 }
 
-export interface SystemSettings {
-  [key: string]: unknown;
-}
-
 export interface PreferencesConfig {
   autoUpdate: boolean;
   showTipsAndUpdates: boolean;
@@ -35,7 +31,6 @@ export interface PreferencesConfig {
   tipsDismissed?: string[];
   showTooltips?: boolean;
   defaultHomeView?: string;
-  rememberLastAi?: boolean;
 }
 
 export interface ScreenshotMetadata {
@@ -88,8 +83,6 @@ export interface ElectronAPI {
   setConfig: (config: ThredConfig) => Promise<void>;
   updateConfig: (patch: Partial<ThredConfig>) => Promise<ThredConfig>;
 
-  // System Settings (electron-store)
-  getSystemSettings: () => Promise<SystemSettings>;
   getThredFolderPath: () => Promise<string>;
   changeThredFolderPath: () => Promise<string | null>;
 

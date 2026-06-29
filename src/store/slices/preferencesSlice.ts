@@ -55,11 +55,6 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
   onboardingComplete: false,
   preferences: DEFAULT_PREFS,
   templates: [],
-  systemSettings: {
-    minimizeToTray: false,
-    launchMinimizedToTray: false,
-    launchAtStartup: false,
-  },
   screenshots: [],
   openedAIs: {},
   aiHistory: [],
@@ -74,8 +69,6 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
     try {
       const config = await window.electron.getConfig();
       const rawScreenshots = await window.electron.getScreenshots();
-
-      await get().loadSystemSettings();
 
       const hydratedTemplates = (config.templates && config.templates.length > 0)
         ? config.templates as TemplateConfig[]
@@ -172,13 +165,6 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
     const newPrefs = { ...get().preferences, ...prefs };
     set({ preferences: newPrefs });
     await window.electron.updateConfig({ preferences: newPrefs });
-  },
-
-  loadSystemSettings: async () => {
-    try {
-      const settings = await window.electron.getSystemSettings();
-      set({ systemSettings: settings });
-    } catch (_) { /* ignored */ }
   },
 
   setUserName: async (name) => {

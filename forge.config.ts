@@ -1,17 +1,19 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import path from 'path';
 
+// Electron Forge is used only to build the Vite bundle and produce a fuse-hardened
+// packaged app (via `electron-forge package`). The Windows installer is then created
+// from that packaged output by electron-builder (NSIS). See electron-builder.json.
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    icon: path.join(__dirname, 'public', 'icons', 'app'),
   },
   rebuildConfig: {},
-  makers: [
-    new MakerSquirrel({}),
-  ],
+  makers: [],
   plugins: [
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.

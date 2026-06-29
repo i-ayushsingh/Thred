@@ -73,7 +73,6 @@ if (isMainWindow) {
     getConfig: () => ipcRenderer.invoke(IPC.THRED_GETCONFIG),
     setConfig: (config: ThredConfig) => ipcRenderer.invoke(IPC.THRED_SETCONFIG, config),
     updateConfig: (patch: Partial<ThredConfig>) => ipcRenderer.invoke(IPC.THRED_UPDATECONFIG, patch),
-    getSystemSettings: () => ipcRenderer.invoke(IPC.SETTINGS_GETSYSTEMSETTINGS),
     getThredFolderPath: () => ipcRenderer.invoke(IPC.SETTINGS_GETTHREDFOLDERPATH),
     changeThredFolderPath: () => ipcRenderer.invoke(IPC.SETTINGS_CHANGETHREDFOLDERPATH),
     vaultGetAll: () => ipcRenderer.invoke(IPC.THRED_VAULT_GETALL),

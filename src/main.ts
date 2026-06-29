@@ -1,9 +1,8 @@
 import { IPC } from './shared/ipc-channels';
-import { app, BrowserWindow, shell, ipcMain, globalShortcut, Tray, Menu, dialog, nativeImage, webContents, clipboard, net, session, protocol, screen, desktopCapturer } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, globalShortcut, dialog, nativeImage, webContents, clipboard, net, session, protocol, screen, desktopCapturer } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import started from 'electron-squirrel-startup';
 import Store from 'electron-store';
 import { pathToFileURL } from 'url';
 import { AI_LIST } from './shared/ai-list';
@@ -20,10 +19,6 @@ import * as secretStore from './secretStore';
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-if (started) {
-  app.quit();
-}
-
 // Disable WebAuthn (Passkeys) globally.
 // Electron's implementation of WebAuthn often conflicts with Google OAuth, 
 // causing the "Windows Security" passkey popup to appear and then fail or block login.
@@ -36,7 +31,6 @@ let store: Store;
 
 let mainWindow: BrowserWindow | null = null;
 let splashWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
 let currentThredFolderPath = '';
 
 function getThredFolderPath(): string {
@@ -529,36 +523,6 @@ ipcMain.handle(IPC.THRED_UPDATECONFIG, async (_event, patch: Partial<ThredConfig
   return next;
 });
 
-const createTray = () => {
-  if (tray) return;
-  const iconPath = path.join(app.getAppPath(), 'public', 'icons', 'professional_trimmed.png');
-
-  tray = new Tray(iconPath);
-
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show Thred', click: () => mainWindow?.show() },
-    { type: 'separator' },
-    {
-      label: 'Quit', click: () => {
-        app.quit();
-      }
-    }
-  ]);
-
-  tray.setToolTip('Thred');
-  tray.setContextMenu(contextMenu);
-
-  tray.on('click', () => {
-    if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.hide();
-      } else {
-        mainWindow.show();
-      }
-    }
-  });
-};
-
 const createWindow = () => {
   // Win 5: Create and show splash screen immediately
   splashWindow = new BrowserWindow({
@@ -606,12 +570,10 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  mainWindow.on('close', (event) => {
-    const minimize = store.get('minimizeToTray', true) as boolean;
-    if (minimize) {
-      event.preventDefault();
-      mainWindow?.hide();
-    }
+  // Closing the window fully quits the app (no hide-to-tray background process).
+  mainWindow.on('close', () => {
+    mainWindow = null;
+    app.quit();
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1086,19 +1048,10 @@ app.whenReady().then(async () => {
     currentThredFolderPath = folderPath;
     registerDownloadHandlers();
 
-    // Read the initial config to decide window visibility
-    const initialConfig = readSettings();
+    // Read settings once on launch (backfills installDate for older installs).
+    readSettings();
 
     createWindow();
-
-    createTray();
-
-    // Sync login item setting on launch
-    const launchAtStartup = store.get('launchAtStartup', true) as boolean;
-    app.setLoginItemSettings({
-      openAtLogin: launchAtStartup,
-      path: app.getPath('exe'),
-    });
   } catch (err) {
 
     dialog.showErrorBox('Thred initialization failed', String(err instanceof Error ? err.stack || err.message : err));
@@ -1188,12 +1141,7 @@ ipcMain.on(IPC.WINDOW_MAXIMIZE, () => {
 });
 ipcMain.on(IPC.WINDOW_CLOSE, () => {
   if (!mainWindow) return;
-  const config = readSettings();
-  if (config.minimizeToTray) {
-    mainWindow.hide();
-  } else {
-    mainWindow.close();
-  }
+  mainWindow.close();
 });
 ipcMain.on(IPC.APP_QUIT, () => {
   app.quit();
@@ -1206,14 +1154,6 @@ ipcMain.on(IPC.GET_PRELOAD_PATH, (event) => {
   event.returnValue = path.join(__dirname, 'preload.js');
 });
 ipcMain.handle(IPC.GET_WINDOW_IS_MAXIMIZED, () => mainWindow?.isMaximized() ?? false);
-
-ipcMain.handle(IPC.SETTINGS_GETSYSTEMSETTINGS, async () => {
-  return {
-    minimizeToTray: store.get('minimizeToTray', false) as boolean,
-    launchMinimizedToTray: store.get('launchMinimizedToTray', false) as boolean,
-    launchAtStartup: store.get('launchAtStartup', false) as boolean,
-  };
-});
 
 ipcMain.handle(IPC.SETTINGS_GETTHREDFOLDERPATH, async () => {
   return getThredFolderPath();

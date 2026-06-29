@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AI_LIST, AIConfig } from '../shared/ai-list';
-import { TemplateConfig, PreferencesConfig, ScreenshotMetadata, SystemSettings, ToolWindow } from '../electron';
+import { TemplateConfig, PreferencesConfig, ScreenshotMetadata, ToolWindow } from '../electron';
 import { VaultItem, TodoItem } from '../shared/vault-schema';
 import { playSuccessSound, playErrorSound } from '../utils/audio';
 
@@ -16,7 +16,7 @@ export interface AIHistoryEntry {
   splitWithUrl?: string;
 }
 
-export type { TemplateConfig, PreferencesConfig, ScreenshotMetadata, SystemSettings, ToolWindow };
+export type { TemplateConfig, PreferencesConfig, ScreenshotMetadata, ToolWindow };
 
 // Adapter types used by the Notes and Todo tool windows.
 // The store translates between these and the vault schema types.
@@ -78,7 +78,6 @@ export interface AppState {
   // Data (now loaded from ThredConfig / files via IPC)
   templates: TemplateConfig[];
   preferences: PreferencesConfig;
-  systemSettings: SystemSettings;
   screenshots: ScreenshotMetadata[];
   vaultItems: VaultItem[]; // Unified array for all vault items
   todoTab: 'temporary' | 'permanent';
@@ -149,9 +148,6 @@ export interface AppState {
 
   // Preferences actions
   updatePreferences: (prefs: Partial<PreferencesConfig>) => Promise<void>;
-
-  // System settings actions (electron-store)
-  loadSystemSettings: () => Promise<void>;
 
   // Profile data
   userName: string;

@@ -3,7 +3,6 @@ export const IPC = {
   THRED_SETCONFIG: 'thred:setConfig',
   THRED_UPDATECONFIG: 'thred:updateConfig',
   GET_WINDOW_IS_MAXIMIZED: 'get-window-is-maximized',
-  SETTINGS_GETSYSTEMSETTINGS: 'settings:getSystemSettings',
   SETTINGS_CHANGETHREDFOLDERPATH: 'settings:changeThredFolderPath',
   SAVE_FILE: 'save-file',
   SCREENSHOT_CAPTURE_CONTENT: 'screenshot:capture-content',

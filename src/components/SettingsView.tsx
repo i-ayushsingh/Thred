@@ -76,7 +76,6 @@ const ActionButton = ({ icon, label, danger = false, onClick, fullWidth = false 
 export const SettingsView: React.FC = () => {
   const t = useT();
   const {  preferences,
-    systemSettings,
     appVersion,
     userName,
     setUserName,
@@ -85,7 +84,7 @@ export const SettingsView: React.FC = () => {
     toggleAIDisabled,
     settingsTab,
     setSettingsTab,
-    setActiveTab  } = useStore(useShallow(state => ({ preferences: state.preferences, systemSettings: state.systemSettings, appVersion: state.appVersion, userName: state.userName, setUserName: state.setUserName, updatePreferences: state.updatePreferences, disabledAIs: state.disabledAIs, toggleAIDisabled: state.toggleAIDisabled, settingsTab: state.settingsTab, setSettingsTab: state.setSettingsTab, setActiveTab: state.setActiveTab })));
+    setActiveTab  } = useStore(useShallow(state => ({ preferences: state.preferences, appVersion: state.appVersion, userName: state.userName, setUserName: state.setUserName, updatePreferences: state.updatePreferences, disabledAIs: state.disabledAIs, toggleAIDisabled: state.toggleAIDisabled, settingsTab: state.settingsTab, setSettingsTab: state.setSettingsTab, setActiveTab: state.setActiveTab })));
 
   const [thredFolderPath, setThredFolderPath] = useState('');
   const [editingName, setEditingName] = useState(false);

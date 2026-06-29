@@ -1,0 +1,39 @@
+{
+  "appId": "ai.qzz.thred",
+  "productName": "Thred",
+  "copyright": "Copyright © 2026 Ayush Singh",
+  "directories": {
+    "output": "out/installer"
+  },
+  "files": [
+    ".vite/**/*",
+    "public/**/*",
+    "src/splash.html",
+    "package.json",
+    "!node_modules/**/*"
+  ],
+  "electronFuses": {
+    "runAsNode": false,
+    "enableCookieEncryption": true,
+    "enableNodeOptionsEnvironmentVariable": false,
+    "enableNodeCliInspectArguments": false,
+    "enableEmbeddedAsarIntegrityValidation": true,
+    "onlyLoadAppFromAsar": true
+  },
+  "win": {
+    "target": ["nsis"],
+    "icon": "public/icons/app.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Thred",
+    "installerIcon": "public/icons/app.ico",
+    "uninstallerIcon": "public/icons/app.ico",
+    "installerHeaderIcon": "public/icons/app.ico",
+    "artifactName": "Thred-Setup.${ext}"
+  }
+}

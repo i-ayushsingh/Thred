@@ -7,11 +7,8 @@
   "private": true,
   "scripts": {
     "start": "electron-forge start",
-    "build": "node build.js",
-    "make:installer": "node make.js",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "dist": "node scripts/build-vite.mjs && electron-builder --win nsis",
     "lint": "eslint ."
   },
   "keywords": [],
@@ -19,7 +16,6 @@
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.11.2",
-    "@electron-forge/maker-squirrel": "^7.11.2",
     "@electron-forge/plugin-auto-unpack-natives": "^7.11.2",
     "@electron-forge/plugin-fuses": "^7.11.2",
     "@electron-forge/plugin-vite": "^7.11.2",
@@ -28,7 +24,6 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.3.1",
-    "@types/electron-squirrel-startup": "^1.0.2",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^10.0.0",
@@ -37,6 +32,7 @@
     "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.5.0",
     "electron": "^42.4.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^10.5.0",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.6.0",
@@ -50,7 +46,6 @@
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",
-    "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^11.0.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

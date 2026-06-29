@@ -40,8 +40,6 @@ export const createAppSlice: StateCreator<AppState, [], [], Partial<AppState>> =
       return;
     }
 
-    // Always set the active AI (don't use rememberLastAi)
-
     if (id) {
       setTimeout(async () => {
         try {
