@@ -68,9 +68,7 @@ const VideoThumbnail: React.FC<{ path: string; className?: string }> = ({ path, 
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const dataUrl = canvas.toDataURL('image/jpeg');
           if (!cancelled) setThumbnailUrl(dataUrl);
-        } catch (e) {
-          console.error('Failed to extract data URL:', e);
-        }
+        } catch (_) { /* ignored */ }
       }
     };
     
@@ -460,9 +458,7 @@ export const DownloadsView: React.FC = () => {
         };
       });
       setDownloads(mapped);
-    } catch (err) {
-      console.error('Failed to load downloads:', err);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   const loadErrors = async () => {
@@ -533,9 +529,7 @@ export const DownloadsView: React.FC = () => {
   const handleCopyDownload = async (item: DownloadItem) => {
     try {
       await window.electron.copyFileToClipboard(item.path);
-    } catch (err) {
-      console.error('Failed to copy download:', err);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   const handleClearErrors = async () => {

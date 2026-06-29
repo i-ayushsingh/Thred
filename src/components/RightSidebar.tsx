@@ -114,17 +114,13 @@ export const RightSidebar: React.FC = () => {
         const base64 = dataUrl.split('base64,')[1];
         await window.electron.copyImageToClipboard(base64);
       }
-    } catch (err) {
-      console.error('Failed to copy screenshot:', err);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   const handleCopyDownload = async (item: any) => {
     try {
       await window.electron.copyFileToClipboard(item.path);
-    } catch (err) {
-      console.error('Failed to copy download:', err);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   const launch = (id: string, title: string, icon: string, tools: { name: string; icon: string; desc?: string }[]) => {

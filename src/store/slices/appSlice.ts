@@ -49,9 +49,7 @@ export const createAppSlice: StateCreator<AppState, [], [], Partial<AppState>> =
           const usage = (config.aiUsage || {}) as Record<string, number>;
           usage[id] = (usage[id] || 0) + 1;
           await window.electron.updateConfig({ aiUsage: usage });
-        } catch (e) {
-          console.error('[Thred Usage Track] Failed to save usage count:', e);
-        }
+        } catch (_) { /* ignored */ }
       }, 0);
     }
 
@@ -88,9 +86,7 @@ export const createAppSlice: StateCreator<AppState, [], [], Partial<AppState>> =
         for (const item of toPreload) {
           get().setActiveAI(item.id, { silent: true });
         }
-      } catch (err) {
-        console.error('[Thred Preload] Failed to preload services:', err);
-      }
+      } catch (_) { /* ignored */ }
     }, 2000);
   },
 

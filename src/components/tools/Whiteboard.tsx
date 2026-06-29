@@ -376,7 +376,6 @@ const WhiteboardInner: React.FC<{
                 setCurrentTitle(vaultItem.title);
                 undefined;
             } catch (err) {
-                console.error('Failed to save whiteboard:', err);
                 undefined;
             }
         }, [currentId, elements, zoom, pan, vaultItems, addVaultItem]);

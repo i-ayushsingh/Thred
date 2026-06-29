@@ -199,12 +199,10 @@ function appendDownloadLog(entry: DownloadLogEntry) {
       // The log is corrupt/unreadable. Don't silently overwrite it — that
       // would destroy any recoverable history. Move it aside first so the
       // user (or a later import) can still inspect it.
-      console.error('[Thred] downloads.json is corrupt, backing it up:', err);
+
       try {
         fs.renameSync(logPath, `${logPath}.corrupt-${Date.now()}`);
-      } catch (backupErr) {
-        console.error('[Thred] Failed to back up corrupt downloads.json:', backupErr);
-      }
+      } catch (_) { /* ignored */ }
       logs = [];
     }
   }
@@ -224,9 +222,7 @@ function appendDownloadLog(entry: DownloadLogEntry) {
       }
       existingArchive.unshift(...archived);
       fs.writeFileSync(archivePath, JSON.stringify(existingArchive, null, 2), 'utf-8');
-    } catch (archiveErr) {
-      console.error('[Thred] Failed to archive old downloads:', archiveErr);
-    }
+    } catch (_) { /* ignored */ }
   }
 
   fs.writeFileSync(logPath, JSON.stringify(logs, null, 2), 'utf-8');
@@ -284,9 +280,7 @@ function registerDownloadHandlers() {
                   host.includes('live.com') ||
                   host.includes('microsoftonline.com') ||
                   host.includes('apple.com');
-      } catch (err) {
-        console.warn(`[Thred Main] Failed to parse URL for OAuth detection: ${details.url}`, err);
-      }
+      } catch (_) { /* ignored */ }
 
       if (isOAuth) {
         details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
@@ -380,7 +374,7 @@ function registerDownloadHandlers() {
               });
             }
           } else {
-            console.error(`[Thred] Download failed! state: ${state}, filename: ${filename}`);
+
             appendDownloadErrorLog({
               id: crypto.randomUUID(),
               filename,
@@ -394,7 +388,7 @@ function registerDownloadHandlers() {
           }
         });
       } catch (err: any) {
-        console.error('[Thred] Error inside will-download handler:', err);
+
         appendDownloadErrorLog({
           id: crypto.randomUUID(),
           filename,
@@ -458,9 +452,7 @@ function readSettings(): ThredConfig {
       }
       try {
         fs.writeFileSync(p, JSON.stringify(config, null, 2), 'utf-8');
-      } catch (writeErr) {
-        console.error('[Thred Main] Failed to write settings config during backfill:', writeErr);
-      }
+      } catch (_) { /* ignored */ }
     }
     config.appVersion = app.getVersion();
     return config;
@@ -646,9 +638,7 @@ const createWindow = () => {
           }
         });
       }
-    } catch (e) {
-      console.error('[Thred] Failed to register global shortcut:', e);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   const unregisterGlobalMaximize = () => {
@@ -656,9 +646,7 @@ const createWindow = () => {
       if (globalShortcut.isRegistered('CommandOrControl+Shift+N')) {
         globalShortcut.unregister('CommandOrControl+Shift+N');
       }
-    } catch (e) {
-      console.warn('[Thred] Failed to unregister global shortcut:', e);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   mainWindow.on('minimize', registerGlobalMaximize);
@@ -851,11 +839,11 @@ const createWindow = () => {
               )
             ]);
           } catch (err: any) {
-            console.warn(`[Thred Win 3] ${err.message}`);
+
             return;
           }
         } else {
-          console.warn(`[Thred Win 3] No ready promise found for webContentsId: ${wc.id}`);
+
           return;
         }
       }
@@ -882,14 +870,12 @@ const createWindow = () => {
           'THRED_COPY'
         ]);
         if (!ALLOWED_THRED_MSG_TYPES.has(payload.type)) {
-          console.warn(`[Thred Main] Blocked unrecognized THRED_MSG type: ${payload.type}`);
+
           return;
         }
 
         handleAIMessage(payload, wc);
-      } catch (err) {
-        console.error('[Thred Main] Error parsing THRED_MSG:', err);
-      }
+      } catch (_) { /* ignored */ }
     };
 
     wc.on('did-finish-load', injectScripts);
@@ -940,99 +926,94 @@ app.whenReady().then(async () => {
   });
 
   protocol.handle('media', (request) => {
-    try {
-      let filePath = decodeURIComponent(
-        request.url.replace(/^media:\/\/local\//i, '').replace(/^media:\/\//i, '')
-      );
+    let filePath = decodeURIComponent(
+      request.url.replace(/^media:\/\/local\//i, '').replace(/^media:\/\//i, '')
+    );
 
-      // Convert forward slashes to backslashes on Windows and format drive letter
-      if (process.platform === 'win32') {
-        filePath = filePath.replace(/\//g, '\\');
-        while (filePath.startsWith('\\') || filePath.startsWith('/')) {
-          filePath = filePath.slice(1);
-        }
-        if (/^[a-zA-Z]:?\\/.test(filePath)) {
-          const drive = filePath.charAt(0);
-          let rest = filePath.slice(1);
-          if (rest.startsWith(':')) rest = rest.slice(1);
-          while (rest.startsWith('\\')) rest = rest.slice(1);
-          filePath = drive + ':\\' + rest;
-        }
+    // Convert forward slashes to backslashes on Windows and format drive letter
+    if (process.platform === 'win32') {
+      filePath = filePath.replace(/\//g, '\\');
+      while (filePath.startsWith('\\') || filePath.startsWith('/')) {
+        filePath = filePath.slice(1);
       }
-
-      // Security: only serve files inside the Thred storage folder or the system downloads folder.
-      const root1 = path.resolve(getThredFolderPath());
-      const root2 = path.resolve(app.getPath('downloads'));
-      const resolved = path.resolve(filePath);
-
-      const rel1 = path.relative(root1, resolved);
-      const rel2 = path.relative(root2, resolved);
-
-      const isInsideRoot1 = !rel1.startsWith('..') && !path.isAbsolute(rel1);
-      const isInsideRoot2 = !rel2.startsWith('..') && !path.isAbsolute(rel2);
-
-      if (!isInsideRoot1 && !isInsideRoot2) {
-        return new Response('Forbidden', { status: 403 });
+      if (/^[a-zA-Z]:?\\/.test(filePath)) {
+        const drive = filePath.charAt(0);
+        let rest = filePath.slice(1);
+        if (rest.startsWith(':')) rest = rest.slice(1);
+        while (rest.startsWith('\\')) rest = rest.slice(1);
+        filePath = drive + ':\\' + rest;
       }
-
-      if (!fs.existsSync(resolved)) {
-        return new Response('Not Found', { status: 404 });
-      }
-
-      const ext = path.extname(resolved).toLowerCase();
-      const imageExts = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.ico', '.avif'];
-
-      if (imageExts.includes(ext)) {
-        let mimeType = 'image/png';
-        if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
-        else if (ext === '.gif') mimeType = 'image/gif';
-        else if (ext === '.webp') mimeType = 'image/webp';
-        else if (ext === '.svg') mimeType = 'image/svg+xml';
-        else if (ext === '.bmp') mimeType = 'image/bmp';
-        else if (ext === '.ico') mimeType = 'image/x-icon';
-        else if (ext === '.avif') mimeType = 'image/avif';
-
-        const data = fs.readFileSync(resolved);
-        return new Response(data, {
-          status: 200,
-          headers: {
-            'Content-Type': mimeType,
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': '*',
-          }
-        });
-      }
-
-      const fileUrl = pathToFileURL(resolved).toString();
-      const fetchOptions: RequestInit = {
-        method: request.method,
-      };
-
-      const headersInit: Record<string, string> = {};
-      request.headers.forEach((value, key) => {
-        if (key.toLowerCase() !== 'referer') {
-          headersInit[key] = value;
-        }
-      });
-      fetchOptions.headers = headersInit;
-
-      return net.fetch(fileUrl, fetchOptions).then(response => {
-        const responseHeaders = new Headers(response.headers);
-        responseHeaders.set('Access-Control-Allow-Origin', '*');
-        responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        responseHeaders.set('Access-Control-Allow-Headers', '*');
-
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: responseHeaders
-        });
-      });
-    } catch (err: any) {
-      console.error('[media protocol] error for', request.url, err?.message);
-      throw err;
     }
+
+    // Security: only serve files inside the Thred storage folder or the system downloads folder.
+    const root1 = path.resolve(getThredFolderPath());
+    const root2 = path.resolve(app.getPath('downloads'));
+    const resolved = path.resolve(filePath);
+
+    const rel1 = path.relative(root1, resolved);
+    const rel2 = path.relative(root2, resolved);
+
+    const isInsideRoot1 = !rel1.startsWith('..') && !path.isAbsolute(rel1);
+    const isInsideRoot2 = !rel2.startsWith('..') && !path.isAbsolute(rel2);
+
+    if (!isInsideRoot1 && !isInsideRoot2) {
+      return new Response('Forbidden', { status: 403 });
+    }
+
+    if (!fs.existsSync(resolved)) {
+      return new Response('Not Found', { status: 404 });
+    }
+
+    const ext = path.extname(resolved).toLowerCase();
+    const imageExts = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.ico', '.avif'];
+
+    if (imageExts.includes(ext)) {
+      let mimeType = 'image/png';
+      if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+      else if (ext === '.gif') mimeType = 'image/gif';
+      else if (ext === '.webp') mimeType = 'image/webp';
+      else if (ext === '.svg') mimeType = 'image/svg+xml';
+      else if (ext === '.bmp') mimeType = 'image/bmp';
+      else if (ext === '.ico') mimeType = 'image/x-icon';
+      else if (ext === '.avif') mimeType = 'image/avif';
+
+      const data = fs.readFileSync(resolved);
+      return new Response(data, {
+        status: 200,
+        headers: {
+          'Content-Type': mimeType,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        }
+      });
+    }
+
+    const fileUrl = pathToFileURL(resolved).toString();
+    const fetchOptions: RequestInit = {
+      method: request.method,
+    };
+
+    const headersInit: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      if (key.toLowerCase() !== 'referer') {
+        headersInit[key] = value;
+      }
+    });
+    fetchOptions.headers = headersInit;
+
+    return net.fetch(fileUrl, fetchOptions).then(response => {
+      const responseHeaders = new Headers(response.headers);
+      responseHeaders.set('Access-Control-Allow-Origin', '*');
+      responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      responseHeaders.set('Access-Control-Allow-Headers', '*');
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: responseHeaders
+      });
+    });
   });
 
   let folderPath = store.get('thredFolderPath') as string;
@@ -1119,7 +1100,7 @@ app.whenReady().then(async () => {
       path: app.getPath('exe'),
     });
   } catch (err) {
-    console.error('[Thred] Failed to initialize:', err);
+
     dialog.showErrorBox('Thred initialization failed', String(err instanceof Error ? err.stack || err.message : err));
     app.quit();
     return;
@@ -1179,7 +1160,7 @@ ipcMain.on('download:blob', async (event, payload: { uint8Array: number[]; filen
       });
     }
   } catch (err: any) {
-    console.error('[Thred Main] Error saving blob download:', err);
+
     appendDownloadErrorLog({
       id: crypto.randomUUID(),
       filename: sanitized,
@@ -1265,7 +1246,7 @@ ipcMain.handle(IPC.SAVE_FILE, async (_event, data: Buffer | Uint8Array, defaultP
     fs.writeFileSync(filePath, Buffer.from(data));
     return true;
   } catch (err) {
-    console.error('[Thred Main] Error saving file:', err);
+
     return false;
   }
 });
@@ -1296,7 +1277,7 @@ ipcMain.handle(IPC.SCREENSHOT_CAPTURE_CONTENT, async (_event, payload: { aiId: s
       height: size.height,
     };
   } catch (err) {
-    console.error('[Thred Main] Error in screenshot:capture-content:', err);
+
     return null;
   }
 });
@@ -1314,7 +1295,7 @@ ipcMain.handle(IPC.SCREENSHOT_CAPTURE_WORKSPACE, async () => {
       height: size.height,
     };
   } catch (err) {
-    console.error('[Thred Main] Error in screenshot:capture-workspace:', err);
+
     return null;
   }
 });
@@ -1355,7 +1336,7 @@ ipcMain.handle('clipboard:write-file', async (_event, filePath: string) => {
     });
     return true;
   } catch (err) {
-    console.error('Failed to copy file to clipboard:', err);
+
     return false;
   }
 });
@@ -1591,9 +1572,7 @@ ipcMain.handle(IPC.THRED_VAULT_GETALL, async () => {
               else item.kind = CATEGORY_TO_KIND[category] || 'note';
             }
             allItems.push({ ...item, category });
-          } catch (err) {
-            console.error(`Error reading vault item ${file}:`, err);
-          }
+          } catch (_) { /* ignored */ }
         }
       });
     }
@@ -1648,9 +1627,7 @@ ipcMain.handle(IPC.THRED_VAULT_EXPORTALL, async () => {
               else item.kind = CATEGORY_TO_KIND[category] || 'note';
             }
             allItems.push({ ...item, category });
-          } catch (err) {
-            console.error(`Error reading vault item for export ${file}:`, err);
-          }
+          } catch (_) { /* ignored */ }
         }
       });
     }
@@ -1735,9 +1712,7 @@ function readBookmarks(): any[] {
       const raw = fs.readFileSync(p, 'utf-8');
       return JSON.parse(raw);
     }
-  } catch (err) {
-    console.error('Error reading bookmarks:', err);
-  }
+  } catch (_) { /* ignored */ }
   return [];
 }
 
@@ -1758,7 +1733,7 @@ ipcMain.handle(IPC.THRED_TOOLS_GET, async (_event, toolName: string) => {
       const raw = fs.readFileSync(dataPath, 'utf-8');
       return JSON.parse(raw);
     } catch (err) {
-      console.error(`Error reading tool data for ${toolName}:`, err);
+
       return null;
     }
   }
@@ -2020,7 +1995,7 @@ ipcMain.handle(IPC.THRED_USERDATA_GET, async (_event, featureName: string) => {
       const raw = fs.readFileSync(dataPath, 'utf-8');
       return JSON.parse(raw);
     } catch (err) {
-      console.error(`Error reading userdata for ${featureName}:`, err);
+
       return null;
     }
   }
@@ -2069,9 +2044,7 @@ ipcMain.handle(IPC.THRED_SCREENSHOTS_SAVE, async (_event, payload: { type: 'cont
   if (fs.existsSync(metaPath)) {
     try {
       screenshots = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-    } catch (err) {
-      console.error('Error reading screenshots metadata for save:', err);
-    }
+    } catch (_) { /* ignored */ }
   }
 
   const id = 'ss-' + Math.random().toString(36).substring(7);
@@ -2098,7 +2071,7 @@ ipcMain.handle(IPC.THRED_SCREENSHOTS_GETALL, async () => {
     const raw = fs.readFileSync(metaPath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
-    console.error('Error reading screenshots metadata:', err);
+
     return [];
   }
 });
@@ -2114,16 +2087,12 @@ ipcMain.handle(IPC.THRED_SCREENSHOTS_DELETE, async (_event, id) => {
     if (targetIndex !== -1) {
       const target = screenshots[targetIndex];
       if (target.path && fs.existsSync(target.path)) {
-        try { fs.unlinkSync(target.path); } catch (err) {
-          console.error(`Error deleting physical screenshot file ${target.path}:`, err);
-        }
+        try { fs.unlinkSync(target.path); } catch (_) { /* ignored */ }
       }
       screenshots.splice(targetIndex, 1);
       fs.writeFileSync(metaPath, JSON.stringify(screenshots, null, 2), 'utf-8');
     }
-  } catch (err) {
-    console.error('Error deleting screenshot:', err);
-  }
+  } catch (_) { /* ignored */ }
 });
 
 ipcMain.handle(IPC.THRED_SCREENSHOTS_READ, async (_event, filePath: string) => {
@@ -2148,7 +2117,7 @@ ipcMain.handle(IPC.THRED_SCREENSHOTS_READ, async (_event, filePath: string) => {
     const data = fs.readFileSync(resolved);
     return `data:${mimeType};base64,${data.toString('base64')}`;
   } catch (err) {
-    console.error(`Error reading file ${filePath}:`, err);
+
     return null;
   }
 });
@@ -2185,7 +2154,7 @@ ipcMain.handle(IPC.THRED_REPORT_SUBMIT, async (_event, report: { aiModel?: strin
     fs.writeFileSync(logPath, JSON.stringify(reports, null, 2), 'utf-8');
     return { ok: true, id: entry.id };
   } catch (err: any) {
-    console.error('Error saving report:', err);
+
     return { ok: false, error: err?.message || 'Failed to save report' };
   }
 });
@@ -2265,13 +2234,11 @@ ipcMain.handle(IPC.SHELL_OPENEXTERNAL, async (_, url: string) => {
     const parsed = new URL(url);
     const allowed = ['https:', 'http:', 'mailto:'];
     if (!allowed.includes(parsed.protocol)) {
-      console.warn('[shell:openExternal] blocked disallowed scheme:', parsed.protocol);
+
       return;
     }
     await shell.openExternal(url);
-  } catch (err) {
-    console.warn('[shell:openExternal] invalid url:', err);
-  }
+  } catch (_) { /* ignored */ }
 });
 
 ipcMain.handle(IPC.DOWNLOADS_DELETEENTRY, async (_, id: string, deleteFile?: boolean) => {
@@ -2340,7 +2307,7 @@ ipcMain.handle(IPC.DOWNLOADS_RENAME, async (_, id: string, newFilename: string) 
     fs.writeFileSync(logPath, JSON.stringify(data, null, 2), 'utf-8');
     return { filename: entry.filename, path: newPath };
   } catch (err) {
-    console.error('[Thred] Failed to rename download:', err);
+
     return false;
   }
 });
@@ -2369,7 +2336,7 @@ ipcMain.handle(IPC.DOWNLOADS_MOVETOSUBFOLDER, async (_, id: string, targetSubfol
     fs.writeFileSync(logPath, JSON.stringify(data, null, 2), 'utf-8');
     return { filename: entry.filename, path: destPath, subfolder: targetSubfolder };
   } catch (err) {
-    console.error('[Thred] Failed to move download:', err);
+
     return false;
   }
 });
@@ -2380,7 +2347,7 @@ ipcMain.handle(IPC.DOWNLOADS_REVEALINOS, async (_: any, filePath: string) => {
     shell.showItemInFolder(filePath);
     return true;
   } catch (err) {
-    console.error('[Thred] Failed to reveal file in OS:', err);
+
     return false;
   }
 });
@@ -2426,9 +2393,7 @@ export function startMemoryProfiler() {
       if (rows.length > 0) {
         // RAM profiler data collected
       }
-    } catch (err) {
-      console.error('[Thred Dev RAM Profiler Error]', err);
-    }
+    } catch (_) { /* ignored */ }
   }, 15000);
 }
 

@@ -76,7 +76,7 @@ export const ScreenshotPreviewModal: React.FC<ScreenshotPreviewModalProps> = ({
       onSaved();
       onClose();
     } catch (err) {
-      console.error('Failed to save screenshot:', err);
+
       undefined;
     } finally {
       setBusy(null);
@@ -92,9 +92,7 @@ export const ScreenshotPreviewModal: React.FC<ScreenshotPreviewModalProps> = ({
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
-    } catch (err) {
-      console.error('Failed to copy screenshot:', err);
-    } finally {
+    } catch (_) { /* ignored */ } finally {
       setBusy(null);
     }
   };

@@ -847,9 +847,7 @@ export const VaultView: React.FC = () => {
         const base64 = dataUrl.split('base64,')[1];
         await window.electron.copyImageToClipboard(base64);
       }
-    } catch (err) {
-      console.error('Failed to copy screenshot:', err);
-    }
+    } catch (_) { /* ignored */ }
   };
 
 

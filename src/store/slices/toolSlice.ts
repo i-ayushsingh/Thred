@@ -62,9 +62,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
         }));
       const activeExists = notes.some(n => n.id === get().activeNoteId);
       set({ notes, activeNoteId: activeExists ? get().activeNoteId : null });
-    } catch (err) {
-      console.error('Failed to load notes from vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   saveNote: async (note) => {
@@ -87,9 +85,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
         updatedAt: note.updatedAt || new Date().toISOString(),
       };
       await get().addVaultItem(vaultItem);
-    } catch (err) {
-      console.error('Failed to save note to vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   deleteNote: async (id) => {
@@ -98,9 +94,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
       set((state) => ({
         activeNoteId: state.activeNoteId === id ? null : state.activeNoteId
       }));
-    } catch (err) {
-      console.error('Failed to delete note from vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   setActiveNoteId: (id) => set({ activeNoteId: id }),
@@ -137,9 +131,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
           };
         });
       set({ todos: { temporary, permanent } });
-    } catch (err) {
-      console.error('Failed to load todos from vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   addTodo: async (todo) => {
@@ -163,9 +155,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
         updatedAt: now,
       };
       await get().addVaultItem(vaultItem);
-    } catch (err) {
-      console.error('Failed to add todo to vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   toggleTodo: async (id) => {
@@ -185,17 +175,13 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
         };
         await get().addVaultItem(updated);
       }
-    } catch (err) {
-      console.error('Failed to toggle todo in vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   deleteTodo: async (id) => {
     try {
       await get().deleteVaultItem(id, 'Notebooks');
-    } catch (err) {
-      console.error('Failed to delete todo from vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   cleanupTodos: async () => {
@@ -210,9 +196,7 @@ export const createToolSlice: StateCreator<AppState, [], [], Partial<AppState>> 
       for (const item of toDelete) {
         await get().deleteVaultItem(item.id, 'Notebooks');
       }
-    } catch (err) {
-      console.error('Failed to cleanup todos in vault:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   minimizeToolWindow: (id) => {

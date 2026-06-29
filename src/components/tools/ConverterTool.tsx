@@ -169,9 +169,7 @@ const ConverterInner: React.FC<{
             if (stored) {
                 try {
                     setHistory(JSON.parse(stored));
-                } catch (e) {
-                    console.error(e);
-                }
+                } catch (_) { /* ignored */ }
             } else {
                 setHistory([]);
             }
@@ -282,7 +280,7 @@ const ConverterInner: React.FC<{
                 throw new Error('Invalid data format');
             }
         } catch (err) {
-            console.error('Failed to fetch exchange rates:', err);
+
             if (isManual) {
                                         undefined;
             }

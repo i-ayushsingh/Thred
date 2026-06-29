@@ -29,9 +29,7 @@ export const ConversationView: React.FC = () => {
     try {
       const b = await window.electron.bookmarksGetAll();
       setBookmarks(b);
-    } catch (e) {
-      console.error('[ConversationView] Failed to load bookmarks:', e);
-    }
+    } catch (_) { /* ignored */ }
   };
 
   useEffect(() => { refresh(); }, []);

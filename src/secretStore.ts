@@ -19,7 +19,7 @@ function readSecrets(): Record<string, string> {
     const data = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(data);
   } catch (err) {
-    console.error('[secretStore] Error reading secrets.json:', err);
+
     return {};
   }
 }
@@ -35,7 +35,7 @@ export function isAvailable(): boolean {
 
 export function setSecret(name: string, value: string): boolean {
   if (!isAvailable()) {
-    console.warn('[secretStore] safeStorage is not available. Cannot save secret:', name);
+
     return false;
   }
   try {
@@ -46,7 +46,7 @@ export function setSecret(name: string, value: string): boolean {
     writeSecrets(secrets);
     return true;
   } catch (err) {
-    console.error(`[secretStore] Failed to encrypt secret ${name}:`, err);
+
     return false;
   }
 }
@@ -61,7 +61,7 @@ export function getSecret(name: string): string | null {
     const encrypted = Buffer.from(base64, 'base64');
     return safeStorage.decryptString(encrypted);
   } catch (err) {
-    console.error(`[secretStore] Failed to decrypt secret ${name}:`, err);
+
     return null;
   }
 }

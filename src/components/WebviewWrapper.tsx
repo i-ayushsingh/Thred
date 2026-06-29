@@ -105,18 +105,14 @@ const WebviewWrapper: React.FC<WebviewWrapperProps> = ({ ai, isActive, className
       if (cancelled) return;
       try {
         webview.loadURL(targetUrl);
-      } catch (e) {
-        console.error('[Thred] Failed to load bookmark URL:', e);
-      }
+      } catch (_) { /* ignored */ }
       clearPendingBookmarkUrl(ai.id);
     };
 
     // Check if the webview is already loaded (has completed at least one page load)
     // by checking if getURL() returns a real URL (not empty or about:blank)
     let currentUrl = '';
-    try { currentUrl = typeof webview.getURL === 'function' ? webview.getURL() : ''; } catch (e) {
-      console.warn('[Thred] Could not read webview URL for bookmark navigation:', e);
-    }
+    try { currentUrl = typeof webview.getURL === 'function' ? webview.getURL() : ''; } catch (_) { /* ignored */ }
 
     if (currentUrl && currentUrl !== '' && !currentUrl.startsWith('about:')) {
       // Webview is already loaded — we can navigate immediately
@@ -292,9 +288,7 @@ const WebviewWrapper: React.FC<WebviewWrapperProps> = ({ ai, isActive, className
                     }
                   }
                 }
-              } catch (e) {
-                console.error('Failed to get info from other webview:', e);
-              }
+              } catch (_) { /* ignored */ }
             }
           }
 
@@ -325,9 +319,7 @@ const WebviewWrapper: React.FC<WebviewWrapperProps> = ({ ai, isActive, className
             }
           }
         }
-      } catch (err) {
-        console.error('Error handling webview navigation:', err);
-      }
+      } catch (_) { /* ignored */ }
     };
 
     const handleTitleUpdated = (e: any) => {
@@ -371,9 +363,7 @@ const WebviewWrapper: React.FC<WebviewWrapperProps> = ({ ai, isActive, className
             void updateAIHistoryTitle(parsed.chatId, finalTitle);
           }
         }
-      } catch (err) {
-        console.error('Error handling page title update:', err);
-      }
+      } catch (_) { /* ignored */ }
     };
 
     // Attach event listeners

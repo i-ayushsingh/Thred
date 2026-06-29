@@ -34,16 +34,12 @@ const suppressWebAuthnScript = `
           };
         }
       }
-    } catch (err) {
-      console.error('[Thred Webview Preload] Failed to suppress WebAuthn:', err);
-    }
+    } catch (_) { /* ignored */ }
   })();
 `;
 try {
   webFrame.executeJavaScript(suppressWebAuthnScript);
-} catch (e) {
-  console.error('[Thred Webview Preload] Failed to run WebAuthn suppression script:', e);
-}
+} catch (_) { /* ignored */ }
 
 
 // Only expose Electron APIs to the main app window (trusted host/protocol)
@@ -168,7 +164,7 @@ if (isMainWindow) {
           setTimeout(() => {
             try {
               originalRevoke.call(URL, url);
-            } catch (e) {}
+            } catch (_) { /* ignored */ }
             blobCache.delete(url);
           }, 15000);
         };
@@ -217,9 +213,7 @@ if (isMainWindow) {
                 window.dispatchEvent(event);
               };
               reader.readAsArrayBuffer(blob);
-            } catch (err) {
-              console.error('[Thred Interceptor] Processing failed:', err);
-            }
+            } catch (_) { /* ignored */ }
             return true;
           }
           return false;
@@ -251,17 +245,13 @@ if (isMainWindow) {
           }
           return originalClick.apply(this, arguments);
         };
-      } catch (err) {
-        console.error('[Thred Main Context] Init failed:', err);
-      }
+      } catch (_) { /* ignored */ }
     })();
   `;
 
   try {
     webFrame.executeJavaScript(injectBlobInterceptor);
-  } catch (e) {
-    console.error('[Thred Preload] Failed to run blob interceptor script:', e);
-  }
+  } catch (_) { /* ignored */ }
 
   // Listen for the custom event sent from the main context
   window.addEventListener('thred-download-blob', (e: any) => {

@@ -68,7 +68,7 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
 
   hydrate: async () => {
     if (!(window.electron && window.electron.getConfig)) {
-      console.error('Electron IPC not available, cannot hydrate store.');
+
       return;
     }
     try {
@@ -125,7 +125,7 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
 
       get().preloadTopServices();
     } catch (err) {
-      console.error('Failed to hydrate store:', err);
+
       set({ isHydrated: true });
     }
   },
@@ -178,9 +178,7 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
     try {
       const settings = await window.electron.getSystemSettings();
       set({ systemSettings: settings });
-    } catch (err) {
-      console.error('Failed to load system settings:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   setUserName: async (name) => {
@@ -237,9 +235,7 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
     try {
       const history = await window.electron.userdataGet('aiHistory');
       set({ aiHistory: Array.isArray(history) ? history : [] });
-    } catch (err) {
-      console.error('Failed to load AI history:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   logAIHistory: async (entry) => {
@@ -253,9 +249,7 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
       const updatedHistory = [newEntry, ...history].slice(0, 500);
       set({ aiHistory: updatedHistory });
       await window.electron.userdataSave('aiHistory', updatedHistory);
-    } catch (err) {
-      console.error('Failed to log AI history:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   updateAIHistoryTitle: async (chatId, title) => {
@@ -273,17 +267,13 @@ export const createPreferencesSlice: StateCreator<AppState, [], [], Partial<AppS
         set({ aiHistory: updatedHistory });
         await window.electron.userdataSave('aiHistory', updatedHistory);
       }
-    } catch (err) {
-      console.error('Failed to update AI history title:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 
   clearAIHistory: async () => {
     try {
       set({ aiHistory: [] });
       await window.electron.userdataSave('aiHistory', []);
-    } catch (err) {
-      console.error('Failed to clear AI history:', err);
-    }
+    } catch (_) { /* ignored */ }
   },
 });

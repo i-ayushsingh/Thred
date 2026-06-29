@@ -116,9 +116,7 @@ export const AppContent: React.FC = () => {
     const doHydrate = async () => {
       try {
         await useStore.getState().hydrate();
-      } catch (err) {
-        console.error('Failed to hydrate store:', err);
-      }
+      } catch (_) { /* ignored */ }
     };
     doHydrate();
 
